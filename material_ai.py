@@ -1,5 +1,28 @@
 import streamlit as st
 
+# 🔐 비밀번호 설정
+PASSWORD = "simwoo"   # 👉 여기 바꾸면 됨
+
+# 🔐 로그인 상태 저장
+if "authenticated" not in st.session_state:
+    st.session_state.authenticated = False
+
+# 🔐 로그인 화면
+if not st.session_state.authenticated:
+    st.title("🔒 사내 전용 시스템")
+    st.write("비밀번호를 입력하세요")
+
+    pw = st.text_input("비밀번호", type="password")
+
+    if st.button("로그인"):
+        if pw == PASSWORD:
+            st.session_state.authenticated = True
+            st.rerun()
+        else:
+            st.error("비밀번호가 틀렸습니다")
+
+    st.stop()  # 🔥 여기서 아래 코드 실행 막음
+
 st.set_page_config(layout="centered")
 
 # =========================
