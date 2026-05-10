@@ -42,7 +42,7 @@ if "doc_menu" not in st.session_state:
     st.session_state.doc_menu = None
 
 # =========================
-# 전체 스타일 (모바일 그리드 강제 유지 적용)
+# 전체 스타일 (웹/모바일 완벽 반응형)
 # =========================
 st.markdown("""
 <style>
@@ -50,29 +50,29 @@ st.markdown("""
     background-color: #f8f9fa;
 }
 
+/* 💻 PC 웹 화면: 너무 넓게 퍼지지 않도록 가운데 정렬 및 최대 너비 고정 */
 .block-container {
     padding-top: 2rem;
     padding-bottom: 2rem;
-    max-width: 800px;
+    max-width: 700px !important; 
+    margin: 0 auto;
 }
 
+/* 기본 버튼 디자인 */
 div.stButton > button {
-    width: 100%;
-    height: 50px;
+    height: 55px;
     border-radius: 12px;
-    background: linear-gradient(135deg, #ffa94d, #ff922b);
-    color: white;
+    background: linear-gradient(135deg, #ffa94d, #ff922b) !important;
+    color: white !important;
     font-size: 18px;
     font-weight: 800;
     border: none;
-    margin-top: 5px;
-    margin-bottom: 5px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     transition: all 0.2s ease;
 }
 
 div.stButton > button:hover {
-    transform: scale(1.02);
+    transform: translateY(-2px);
     box-shadow: 0 6px 15px rgba(0,0,0,0.2);
 }
 
@@ -109,68 +109,46 @@ div.stButton > button:hover {
     line-height: 1.4;
 }
 
-section[data-testid="stSidebar"] div.stButton > button {
-    width: 100%;
-    padding: 15px;
-    margin-bottom: 10px;
-    border-radius: 12px;
-    border: 1px solid #e9ecef;
-    background: linear-gradient(135deg, #ffffff, #f8f9fa);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-    font-size: 15px;
-    font-weight: 700;
-    color: #212529 !important;
-}
-
-label[data-baseweb="select"] + div,
-div[data-baseweb="select"] {
-    font-size: 15px;
-}
-
-/* 🔥 모바일 반응형 핵심 수정 구역 🔥 */
+/* 📱 모바일 화면: 가로 스크롤 제거 및 3열 꽉 차게 배치 */
 @media screen and (max-width: 768px) {
     .block-container {
-        padding-top: 1.5rem;
-        padding-left: 1rem;
-        padding-right: 1rem;
+        padding-top: 1.5rem !important;
+        padding-left: 0.5rem !important; 
+        padding-right: 0.5rem !important;
+        overflow-x: hidden !important; 
     }
     
-    /* 1. 스트림릿이 모바일에서 버튼 컬럼을 세로로 찢어버리는 것을 강제 방지 */
+    /* Streamlit이 모바일에서 강제로 세로로 꺾는 현상 방지 */
     div[data-testid="stHorizontalBlock"] {
         flex-wrap: nowrap !important;
-        gap: 6px !important;
-    }
-    div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
-        width: auto !important;
-        min-width: 0 !important;
-        flex: 1 1 0% !important;
+        gap: 6px !important; 
+        margin-bottom: 5px !important;
     }
     
-    /* 2. 버튼 텍스트가 잘리지 않도록 폰트 크기 및 여백 조정 */
+    div[data-testid="column"] {
+        flex: 1 1 0% !important; 
+        width: 100% !important;
+        min-width: 0 !important;
+        padding: 0 !important; 
+    }
+    
+    /* 모바일용 버튼 텍스트 최적화 */
     div.stButton > button {
-        font-size: 13px !important;
-        height: 45px !important;
-        padding: 0px 2px !important;
-        word-break: keep-all;
-        line-height: 1.2;
+        font-size: 14px !important; 
+        letter-spacing: -0.5px !important; 
+        height: 48px !important;
+        padding: 0 !important;
+        margin: 0 !important; 
     }
     
     .material-wrapper {
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
         gap: 8px;
     }
     
-    .material-card {
-        padding: 10px;
-        font-size: 13px;
-    }
-    
-    h1 {
-        font-size: 24px !important;
-    }
-    .sub-title {
-        font-size: 20px !important;
-    }
+    .material-card { padding: 10px; font-size: 13px; }
+    h1 { font-size: 24px !important; }
+    .sub-title { font-size: 20px !important; }
 }
 </style>
 """, unsafe_allow_html=True)
@@ -243,7 +221,7 @@ st.markdown("""
 
 
 # =========================
-# 공종 버튼 (가로 3열 유지 로직)
+# 공종 버튼 (PC/모바일 모두 3열 유지 + 반응형)
 # =========================
 types = [
     "타일공사", "방수공사", "미장공사", "도장공사",
@@ -251,14 +229,13 @@ types = [
     "창호공사", "금속공사", "전기공사", "설비공사"
 ]
 
-# 모바일에서도 읽는 순서(좌->우)가 꼬이지 않도록 3개씩 끊어서 출력합니다.
 for i in range(0, len(types), 3):
     cols = st.columns(3)
     for j in range(3):
         if i + j < len(types):
             with cols[j]:
-                # 버튼 고유 키값 지정
-                if st.button(types[i + j], key=f"type_{i+j}"):
+                # 🔥 핵심: use_container_width=True 를 추가하여 버튼이 열(Column) 너비에 꽉 차게 만듭니다.
+                if st.button(types[i + j], key=f"type_{i+j}", use_container_width=True):
                     st.session_state.defect_type = types[i + j]
                     st.session_state.search_clicked = False
                     st.session_state.video_menu = None
