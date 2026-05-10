@@ -42,7 +42,7 @@ if "doc_menu" not in st.session_state:
     st.session_state.doc_menu = None
 
 # =========================
-# 전체 스타일 (웹/모바일 완벽 반응형)
+# 전체 스타일 (웹/모바일 완벽 반응형 - 모바일 3열 강제 고정)
 # =========================
 st.markdown("""
 <style>
@@ -50,7 +50,7 @@ st.markdown("""
     background-color: #f8f9fa;
 }
 
-/* 💻 PC 웹 화면: 너무 넓게 퍼지지 않도록 가운데 정렬 및 최대 너비 고정 */
+/* 💻 PC 웹 화면: 너무 넓게 퍼지지 않도록 가운데 정렬 */
 .block-container {
     padding-top: 2rem;
     padding-bottom: 2rem;
@@ -109,36 +109,38 @@ div.stButton > button:hover {
     line-height: 1.4;
 }
 
-/* 📱 모바일 화면: 가로 스크롤 제거 및 3열 꽉 차게 배치 */
+/* 📱 모바일 화면: 가로 스크롤 제거 및 무조건 3열 고정 */
 @media screen and (max-width: 768px) {
     .block-container {
-        padding-top: 1.5rem !important;
+        padding-top: 1rem !important; /* 상단 여백을 더 줄임 */
         padding-left: 0.5rem !important; 
         padding-right: 0.5rem !important;
         overflow-x: hidden !important; 
     }
     
-    /* Streamlit이 모바일에서 강제로 세로로 꺾는 현상 방지 */
+    /* 🔥 핵심: Streamlit이 모바일에서 세로(column)로 꺾는 것을 가로(row)로 강제 고정! */
     div[data-testid="stHorizontalBlock"] {
+        flex-direction: row !important; 
         flex-wrap: nowrap !important;
-        gap: 6px !important; 
-        margin-bottom: 5px !important;
+        gap: 5px !important; 
+        margin-bottom: 0px !important; /* 버튼 묶음 사이 세로 간격 최소화 */
     }
     
-    div[data-testid="column"] {
-        flex: 1 1 0% !important; 
-        width: 100% !important;
+    /* 각 버튼이 정확히 33.3%씩 자리를 차지하도록 강제 */
+    div[data-testid="column"], div[data-testid="stColumn"] {
+        width: 33.33% !important;
+        flex: 1 1 33.33% !important; 
         min-width: 0 !important;
         padding: 0 !important; 
     }
     
-    /* 모바일용 버튼 텍스트 최적화 */
+    /* 모바일용 버튼 크기를 한 화면에 들어오도록 압축 */
     div.stButton > button {
-        font-size: 14px !important; 
+        font-size: 13px !important; 
         letter-spacing: -0.5px !important; 
-        height: 48px !important;
+        height: 42px !important; /* 높이를 확 줄여서 스크롤 방지 */
         padding: 0 !important;
-        margin: 0 !important; 
+        margin: 2px 0px !important; 
     }
     
     .material-wrapper {
@@ -146,9 +148,9 @@ div.stButton > button:hover {
         gap: 8px;
     }
     
-    .material-card { padding: 10px; font-size: 13px; }
-    h1 { font-size: 24px !important; }
-    .sub-title { font-size: 20px !important; }
+    .material-card { padding: 8px; font-size: 12px; }
+    h1 { font-size: 22px !important; }
+    .sub-title { font-size: 18px !important; }
 }
 </style>
 """, unsafe_allow_html=True)
