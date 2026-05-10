@@ -46,6 +46,8 @@ if "doc_menu" not in st.session_state:
 # =========================
 st.markdown("""
 <style>
+
+/* 기존 스타일 코드들 시작 */
 .stApp {
     background-color: #f8f9fa;
 }
@@ -197,6 +199,7 @@ section[data-testid="stSidebar"] div.stButton > button:hover {
 # (모바일 최적화를 위해 컬럼을 나누지 않고 컨테이너 너비를 모두 사용합니다)
 col_img, col_empty = st.columns([1, 4])
 with col_img:
+    st.markdown("<div style='height:25px;'></div>", unsafe_allow_html=True)
     st.image("lynn.png", width=80)
 
 # 1. 메인 타이틀 (위치 고정값 제거, 반응형 중앙정렬)
