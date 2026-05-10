@@ -1,4 +1,5 @@
 import streamlit as st
+import pandas as pd
 
 # 🔐 비밀번호 설정
 PASSWORD = "simwoo"   # 👉 여기 바꾸면 됨
@@ -23,7 +24,7 @@ if not st.session_state.authenticated:
 
     st.stop()  # 🔥 여기서 아래 코드 실행 막음
 
-st.set_page_config(layout="centered")
+st.set_page_config(layout="centered", page_title="공종별 작업 메뉴얼", page_icon="🏗️")
 
 # =========================
 # 세션 상태 초기화
@@ -41,7 +42,7 @@ if "doc_menu" not in st.session_state:
     st.session_state.doc_menu = None
 
 # =========================
-# 전체 스타일
+# 전체 스타일 (모바일 반응형 적용)
 # =========================
 st.markdown("""
 <style>
@@ -49,31 +50,32 @@ st.markdown("""
     background-color: #f8f9fa;
 }
 
+/* 기본 컨테이너 여백 축소 */
 .block-container {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding-left: 2rem;
-    padding-right: 2rem;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+    max-width: 800px;
 }
 
 /* 메인 버튼 */
 div.stButton > button {
     width: 100%;
     height: 50px;
-    border-radius: 16px;
+    border-radius: 12px;
     background: linear-gradient(135deg, #ffa94d, #ff922b);
     color: white;
-    font-size: 20px;
-    font-weight: 900;
+    font-size: 18px;
+    font-weight: 800;
     border: none;
-    margin: 8px 6px 12px 6px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    margin-top: 5px;
+    margin-bottom: 5px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     transition: all 0.2s ease;
 }
 
 div.stButton > button:hover {
-    transform: scale(1.05);
-    box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+    transform: scale(1.02);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.2);
 }
 
 /* 경고 배너 */
@@ -82,48 +84,32 @@ div.stButton > button:hover {
     text-align: center;
     color: #856404;
     background-color: #fff3cd;
-    padding: 15px;
+    padding: 12px;
     border-radius: 10px;
     margin-top: 15px;
     font-weight: 600;
-    font-size: 16px;
+    font-size: 15px;
     box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 
-/* 자재 카드 */
+/* 자재 카드 (기본) */
 .material-wrapper {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
     margin-top: 10px;
 }
 
 .material-card {
     background: linear-gradient(135deg, #ffffff, #f1f3f5);
-    border-radius: 16px;
-    padding: 18px;
+    border-radius: 12px;
+    padding: 14px;
     text-align: center;
     font-size: 14px;
     font-weight: 600;
     border: 1px solid #e9ecef;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-    transition: all 0.25s ease;
-    cursor: pointer;
-}
-
-.material-card:hover {
-    transform: translateY(-6px) scale(1.03);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.18);
-    border-color: #FFA94D;
-    background: linear-gradient(135deg, #fff4e6, #ffe8cc);
-}
-
-.material-icon {
-    font-size: 26px;
-    margin-bottom: 8px;
-}
-
-.material-title {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    transition: all 0.2s ease;
     word-break: keep-all;
     line-height: 1.4;
 }
@@ -131,95 +117,153 @@ div.stButton > button:hover {
 /* 사이드바 버튼 */
 section[data-testid="stSidebar"] div.stButton > button {
     width: 100%;
-    padding: 25px;
-    margin-bottom: 14px;
-    border-radius: 20px;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 12px;
     border: 1px solid #e9ecef;
     background: linear-gradient(135deg, #ffffff, #f8f9fa);
-    box-shadow: 0 6px 16px rgba(0,0,0,0.08);
-    font-size: 14px;
-    font-weight: 800;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    font-size: 15px;
+    font-weight: 700;
     color: #212529 !important;
-    transition: all 0.25s ease;
 }
 
-/* selectbox 라벨 조금 강조 */
+/* selectbox 라벨 폰트 크기 조정 */
 label[data-baseweb="select"] + div,
 div[data-baseweb="select"] {
-    font-size: 16px;
+    font-size: 15px;
+}
+
+/* 모바일용 반응형 미디어 쿼리 */
+@media screen and (max-width: 768px) {
+    .block-container {
+        padding-top: 1.5rem;
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    
+    /* 모바일에서는 자재 카드를 2열 또는 적절히 배치되도록 더 작게 설정 */
+    .material-wrapper {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 8px;
+    }
+    
+    .material-card {
+        padding: 10px;
+        font-size: 13px;
+    }
+    
+    /* 텍스트 크기 조정 */
+    h1 {
+        font-size: 24px !important;
+    }
+    .sub-title {
+        font-size: 20px !important;
+    }
+    
+    div.stButton > button {
+        font-size: 16px;
+        height: 45px;
+    }
 }
 </style>
 """, unsafe_allow_html=True)
 
-# =========================
-# 메인 중앙 레이아웃
-# =========================
-main_left, main_center, main_right = st.columns([1, 8, 1])
 
 # =========================
-# 상단 헤더
+# 상단 헤더 및 카테고리
 # =========================
-with main_center:
-    st.image("lynn.png", width=100)
-    st.markdown("<br>", unsafe_allow_html=True)
+# (모바일 최적화를 위해 컬럼을 나누지 않고 컨테이너 너비를 모두 사용합니다)
+col_img, col_empty = st.columns([1, 4])
+with col_img:
+    st.image("lynn.png", width=80)
 
-    st.markdown("""
-    <div style="max-width:700px; margin:0 auto; text-align:center;">
-        <h1 style="
-            margin:0;
-            position: relative;
-            left: -30px;
-        ">
-            전유부 공종별 작업 메뉴얼
-        </h1>
-        <p style="
-            font-size:30px;
-            font-weight:700;
-            margin-top:10px;
-            margin-bottom:0;
-            position: relative;
-            left: -45px;
-        ">
-            ※공종 선택※
+# 1. 메인 타이틀 (위치 고정값 제거, 반응형 중앙정렬)
+st.markdown("""
+<div style="text-align:center; margin-bottom: 20px;">
+    <h1 style="margin:0; font-size: 28px;">전유부 공종별 작업 메뉴얼</h1>
+    <p class="sub-title" style="font-size:22px; font-weight:700; color:#e67e22; margin-top:10px; margin-bottom:0;">※ 현장별 자재 현황 ※</p>
+</div>
+""", unsafe_allow_html=True)
+
+
+# 현장별 자재 현황 선택 UI
+site_list = ["현장을 선택하세요", "음성성본1차"]
+
+selected_site = st.selectbox(
+    "현장 선택", 
+    site_list, 
+    index=1, 
+    label_visibility="collapsed", 
+    key="site_select"
+)
+
+# [음성성본1차] 선택 시 엑셀 표시 로직
+if selected_site == "음성성본1차":
+    excel_files = {
+        "자재명": None,
+        "타일 자재현황": "(음성성본1차)_하자보수자재(타일).xlsx",
+        "도배 자재현황": "(음성성본1차)_하자보수자재(도배).xlsx",
+        "마루 자재현황": "(음성성본1차)_하자보수자재(마루).xlsx"
+    }
+    
+    selected_excel = st.selectbox("엑셀 파일 선택", list(excel_files.keys()), label_visibility="collapsed", key="excel_select")
+    
+    if selected_excel != "자재명":
+        file_name = excel_files[selected_excel]
+        file_path = f"docs/{file_name}"
+        
+        try:
+            df = pd.read_excel(file_path, header=1)
+            df = df.loc[:, ~df.columns.str.contains('Unnamed')]
+            df = df.dropna(how='all')
+            df = df.fillna("")
+            df = df.astype(str).replace(r'\.0$', '', regex=True)
+
+            st.markdown(f"#### 📊 {selected_excel} 현황 데이터")
+            st.dataframe(df, use_container_width=True, height=350) # 모바일을 위해 높이 소폭 조정
+            
+        except FileNotFoundError:
+            st.error(f"⚠️ '{file_name}' 파일을 'docs' 폴더 내에서 찾을 수 없습니다.")
+        except Exception as e:
+            st.error(f"⚠️ 에러 발생: {e}")
+
+# 2. 공종 선택 타이틀
+st.markdown("""
+<div style="text-align:center; margin-top: 30px; margin-bottom: 15px;">
+    <p class="sub-title" style="font-size:24px; font-weight:700; margin:0;">※ 공종 선택 ※</p>
+</div>
+""", unsafe_allow_html=True)
+
+
+# =========================
+# 공종 버튼 (모바일을 고려해 3열 배열로 수정)
+# =========================
+cols = st.columns(3)
+
+types = [
+    "타일공사", "방수공사", "미장공사", "도장공사",
+    "내장공사", "도배공사", "마루공사", "가구공사",
+    "창호공사", "금속공사", "전기공사", "설비공사"
+]
+
+for i, t in enumerate(types):
+    with cols[i % 3]:
+        if st.button(t, key=f"type_{i}"):
+            st.session_state.defect_type = t
+            st.session_state.search_clicked = False
+            st.session_state.video_menu = None
+            st.session_state.doc_menu = None
+
+if st.session_state.defect_type:
+    st.markdown(f"""
+    <div style="text-align:center; margin-top:15px; margin-bottom:10px;">
+        <p style='font-size:18px; font-weight:600;'>
+            선택 공종 : <span style='color:#ff922b'>{st.session_state.defect_type}</span>
         </p>
     </div>
     """, unsafe_allow_html=True)
 
-# =========================
-# 공종 버튼
-# =========================
-with main_center:
-    cols = st.columns(4)
-
-    types = [
-        "타일공사", "방수공사", "미장공사", "도장공사",
-        "내장공사", "도배공사", "마루공사", "가구공사",
-        "창호공사", "금속공사", "전기공사", "설비공사"
-    ]
-
-    for i, t in enumerate(types):
-        with cols[i % 4]:
-            if st.button(t, key=f"type_{i}"):
-                st.session_state.defect_type = t
-                st.session_state.search_clicked = False
-                st.session_state.video_menu = None
-                st.session_state.doc_menu = None
-
-with main_center:
-    if st.session_state.defect_type:
-        st.markdown(f"""
-        <div style="
-            max-width:700px;
-            margin:0 auto;
-            text-align:center;
-            position: relative;
-            left: -45px;
-        ">
-            <p style='font-size:18px; font-weight:600; margin-top:10px;'>
-                선택 공종 : <span style='color:#ff922b'>{st.session_state.defect_type}</span>
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
 
 # =========================
 # 사이드바
@@ -227,12 +271,15 @@ with main_center:
 with st.sidebar:
     st.markdown("### ⚙️ 설정")
 
-    if st.button("🔄 전체 초기화"):
+    def reset_all():
         st.session_state.defect_type = None
         st.session_state.search_clicked = False
         st.session_state.video_menu = None
         st.session_state.doc_menu = None
-        st.rerun()
+        st.session_state.site_select = "음성성본1차"
+        st.session_state.excel_select = "자재명"
+
+    st.button("🔄 전체 초기화", on_click=reset_all)
 
     st.markdown("### 🎬 영상 자료")
 
@@ -269,18 +316,7 @@ with st.sidebar:
         st.subheader(f"📺 {st.session_state.video_menu} 영상")
 
         for title, v in video_map.get(st.session_state.video_menu, []):
-            st.markdown(
-                f"""
-                <div style="
-                    font-size:16px;
-                    font-weight:700;
-                    margin-bottom:5px;
-                ">
-                    🎬 {title}
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
+            st.markdown(f"<div style='font-size:15px; font-weight:700; margin-bottom:5px;'>🎬 {title}</div>", unsafe_allow_html=True)
             st.video(v)
             st.divider()
 
@@ -309,27 +345,12 @@ with st.sidebar:
         st.subheader(f"📑 {st.session_state.doc_menu}")
 
         for title, path in doc_map.get(st.session_state.doc_menu, []):
-            st.markdown(
-                f"""
-                <div style="
-                    font-size:16px;
-                    font-weight:700;
-                    margin-bottom:5px;
-                ">
-                    📄 {title}
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
+            st.markdown(f"<div style='font-size:15px; font-weight:700; margin-bottom:5px;'>📄 {title}</div>", unsafe_allow_html=True)
 
-            if path.endswith(".pdf"):
-                mime_type = "application/pdf"
-            elif path.endswith(".xlsx"):
-                mime_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            elif path.endswith(".xls"):
-                mime_type = "application/vnd.ms-excel"
-            else:
-                mime_type = "application/octet-stream"
+            if path.endswith(".pdf"): mime_type = "application/pdf"
+            elif path.endswith(".xlsx"): mime_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            elif path.endswith(".xls"): mime_type = "application/vnd.ms-excel"
+            else: mime_type = "application/octet-stream"
 
             with open(path, "rb") as file:
                 st.download_button(
@@ -339,25 +360,21 @@ with st.sidebar:
                     mime=mime_type,
                     key=f"doc_{title}"
                 )
-
             st.divider()
 
+
 # =========================
-# 선택 공종
+# 선택 공종 & 세부공종 로직
 # =========================
 defect_type = st.session_state.defect_type
 
 if defect_type is None and st.session_state.video_menu is None and st.session_state.doc_menu is None:
-    with main_center:
-        st.markdown(
-            "<h3 style='text-align:center; color:orange; margin-top:30px;'>⚠️ 공종 먼저 선택하세요</h3>",
-            unsafe_allow_html=True
-        )
+    st.markdown(
+        "<h3 style='text-align:center; color:orange; margin-top:40px;'>⚠️ 공종을 먼저 선택하세요</h3>",
+        unsafe_allow_html=True
+    )
     st.stop()
 
-# =========================
-# 세부공종 데이터
-# =========================
 sub_work_map = {
     "타일공사": ["타일교체", "마감공사"],
     "방수공사": ["액체방수", "도막방수", "복합방수"],
@@ -374,26 +391,18 @@ sub_work_map = {
 }
 
 sub_list = sub_work_map.get(defect_type, [])
-
-# =========================
-# 세부공종 선택
-# =========================
-# =========================
-# 세부공종 선택
-# =========================
 sub_work = "선택하세요"
 
 if defect_type is not None:
     if len(sub_list) == 1 and sub_list[0] == defect_type:
         sub_work = defect_type
     else:
-        with main_center:
-            st.markdown("<br>", unsafe_allow_html=True)
-            sub_work = st.selectbox(
-                "세부 공종 선택",
-                ["선택하세요"] + sub_list,
-                key="sub_work_select"
-            )
+        st.markdown("<br>", unsafe_allow_html=True)
+        sub_work = st.selectbox(
+            "세부 공종 선택",
+            ["선택하세요"] + sub_list,
+            key="sub_work_select"
+        )
 
 # =========================
 # 데이터베이스
@@ -474,28 +483,27 @@ warranty_db = {
 }
 
 # =========================
-# 검색 버튼
+# 검색 버튼 (가운데 정렬 유지)
 # =========================
 search_btn = False
 
 if defect_type is not None:
-    with main_center:
-        st.markdown("<br>", unsafe_allow_html=True)
-        btn_left, btn_center, btn_right = st.columns([2.5, 2, 2.5])
-        with btn_center:
-            search_btn = st.button("🔍 검색 실행")
+    st.markdown("<br>", unsafe_allow_html=True)
+    # 모바일에서도 검색 버튼이 꽉 차거나 적당한 너비를 가지도록 컬럼 비율 조정
+    btn_col1, btn_col2, btn_col3 = st.columns([1, 2, 1])
+    with btn_col2:
+        search_btn = st.button("🔍 검색 실행")
 
 # =========================
 # 검색 처리
 # =========================
 if search_btn:
     if len(sub_list) > 1 and sub_work == "선택하세요":
-        with main_center:
-            st.markdown("""
-            <div class="warning-banner">
-                ⚠️ 세부공종을 먼저 선택하세요
-            </div>
-            """, unsafe_allow_html=True)
+        st.markdown("""
+        <div class="warning-banner">
+            ⚠️ 세부공종을 먼저 선택하세요
+        </div>
+        """, unsafe_allow_html=True)
         st.session_state.search_clicked = False
     else:
         st.session_state.search_clicked = True
@@ -503,90 +511,91 @@ if search_btn:
 # =========================
 # 결과 출력
 # =========================
-with main_center:
-    if st.session_state.search_clicked and sub_work != "선택하세요":
+if st.session_state.search_clicked and sub_work != "선택하세요":
 
-        # 담보책임기간
-        st.subheader("🛡️ 담보책임기간(공동주택관리법 제36조 제1항 제2호)")
+    # 담보책임기간
+    st.subheader("🛡️ 담보책임기간(공동주택관리법 제36조)")
 
-        period = warranty_db.get(sub_work)
+    period = warranty_db.get(sub_work)
 
-        if period:
-            st.markdown(f"""
-            <div style="
-                padding:12px;
-                margin:8px 0;
-                border-radius:10px;
-                background-color:#e7f5ff;
-                border-left:5px solid #339af0;
-                font-weight:600;
-                font-size:18px;
-                text-align:center;
-                box-shadow:0 2px 6px rgba(0,0,0,0.1);
-            ">
-                {sub_work} : {period}
-            </div>
-            """, unsafe_allow_html=True)
+    if period:
+        st.markdown(f"""
+        <div style="
+            padding:12px;
+            margin:8px 0;
+            border-radius:10px;
+            background-color:#e7f5ff;
+            border-left:5px solid #339af0;
+            font-weight:600;
+            font-size:16px;
+            text-align:center;
+            box-shadow:0 2px 6px rgba(0,0,0,0.05);
+            word-break: keep-all;
+        ">
+            {sub_work} : {period}
+        </div>
+        """, unsafe_allow_html=True)
+    else:
+        st.warning("담보책임기간 정보 없음")
+
+    st.divider()
+
+    # 필요 자재
+    st.subheader("🔧 필요 자재")
+
+    if sub_work in material_db:
+        materials = material_db.get(sub_work, [])
+
+        html = '<div class="material-wrapper">'
+
+        for m in materials:
+            html += (
+                '<div class="material-card">'
+                f'{m}'
+                '</div>'
+            )
+
+        html += '</div>'
+
+        st.markdown(html, unsafe_allow_html=True)
+    else:
+        st.warning("자재 정보 없음")
+
+    st.divider()
+
+    # 영상 자료
+    st.subheader("🎬 영상 자료")
+
+    videos = video_db.get(sub_work)
+    has_guide_video = bool(videos)
+
+    if videos:
+        for title, url in videos:
+            st.markdown(f"#### {title}")
+            st.video(url)
+            st.divider()
+
+    # 작업 가이드
+    if not has_guide_video:
+        st.subheader("📋 작업 가이드")
+
+        process = process_db.get(sub_work)
+
+        if process:
+            for i, step in enumerate(process, 1):
+                st.markdown(f"""
+                <div style="
+                    padding:12px;
+                    margin:8px 0;
+                    border-radius:10px;
+                    background-color:#fff7ed;
+                    border-left:5px solid #FFA94D;
+                    line-height:1.5;
+                    font-size: 15px;
+                ">
+                    <b style="color: #d97706;">🔹 STEP {i}</b><br><br>
+                    {step}
+                </div>
+                """, unsafe_allow_html=True)
         else:
-            st.warning("담보책임기간 정보 없음")
-
-        st.divider()
-
-        # 필요 자재
-        st.subheader("🔧 필요 자재")
-
-        if sub_work in material_db:
-            materials = material_db.get(sub_work, [])
-
-            html = '<div class="material-wrapper">'
-
-            for m in materials:
-                html += (
-                    '<div class="material-card">'
-                    f'<div class="material-title">{m}</div>'
-                    '</div>'
-                )
-
-            html += '</div>'
-
-            st.markdown(html, unsafe_allow_html=True)
-        else:
-            st.warning("자재 정보 없음")
-
-        st.divider()
-
-        # 영상 자료
-        st.subheader("영상 자료")
-
-        videos = video_db.get(sub_work)
-        has_guide_video = bool(videos)
-
-        if videos:
-            for title, url in videos:
-                st.markdown(f"### 🎬 {title}")
-                st.video(url)
-                st.divider()
-
-        # 작업 가이드
-        if not has_guide_video:
-            st.subheader("📋 작업 가이드")
-
-            process = process_db.get(sub_work)
-
-            if process:
-                for i, step in enumerate(process, 1):
-                    st.markdown(f"""
-                    <div style="
-                        padding:12px;
-                        margin:6px 0;
-                        border-radius:10px;
-                        background-color:#fff7ed;
-                        border-left:5px solid #FFA94D;
-                        line-height:1.6;
-                    ">
-                        <b>🔹 STEP {i}</b><br><br>
-                        {step}
-                    </div>
-                    """, unsafe_allow_html=True)
-            else:
-                st.warning("작업순서 정보 없음")
+            st.warning("작업순서 정보 없음")
