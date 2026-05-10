@@ -42,7 +42,7 @@ if "doc_menu" not in st.session_state:
     st.session_state.doc_menu = None
 
 # =========================
-# 전체 스타일 (모바일 반응형 적용)
+# 전체 스타일 (모바일 그리드 강제 유지 적용)
 # =========================
 st.markdown("""
 <style>
@@ -50,14 +50,12 @@ st.markdown("""
     background-color: #f8f9fa;
 }
 
-/* 기본 컨테이너 여백 축소 */
 .block-container {
     padding-top: 2rem;
     padding-bottom: 2rem;
     max-width: 800px;
 }
 
-/* 메인 버튼 */
 div.stButton > button {
     width: 100%;
     height: 50px;
@@ -78,7 +76,6 @@ div.stButton > button:hover {
     box-shadow: 0 6px 15px rgba(0,0,0,0.2);
 }
 
-/* 경고 배너 */
 .warning-banner {
     width: 100%;
     text-align: center;
@@ -92,7 +89,6 @@ div.stButton > button:hover {
     box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 
-/* 자재 카드 (기본) */
 .material-wrapper {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -109,12 +105,10 @@ div.stButton > button:hover {
     font-weight: 600;
     border: 1px solid #e9ecef;
     box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    transition: all 0.2s ease;
     word-break: keep-all;
     line-height: 1.4;
 }
 
-/* 사이드바 버튼 */
 section[data-testid="stSidebar"] div.stButton > button {
     width: 100%;
     padding: 15px;
@@ -128,13 +122,12 @@ section[data-testid="stSidebar"] div.stButton > button {
     color: #212529 !important;
 }
 
-/* selectbox 라벨 폰트 크기 조정 */
 label[data-baseweb="select"] + div,
 div[data-baseweb="select"] {
     font-size: 15px;
 }
 
-/* 모바일용 반응형 미디어 쿼리 */
+/* 🔥 모바일 반응형 핵심 수정 구역 🔥 */
 @media screen and (max-width: 768px) {
     .block-container {
         padding-top: 1.5rem;
@@ -142,7 +135,26 @@ div[data-baseweb="select"] {
         padding-right: 1rem;
     }
     
-    /* 모바일에서는 자재 카드를 2열 또는 적절히 배치되도록 더 작게 설정 */
+    /* 1. 스트림릿이 모바일에서 버튼 컬럼을 세로로 찢어버리는 것을 강제 방지 */
+    div[data-testid="stHorizontalBlock"] {
+        flex-wrap: nowrap !important;
+        gap: 6px !important;
+    }
+    div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
+        width: auto !important;
+        min-width: 0 !important;
+        flex: 1 1 0% !important;
+    }
+    
+    /* 2. 버튼 텍스트가 잘리지 않도록 폰트 크기 및 여백 조정 */
+    div.stButton > button {
+        font-size: 13px !important;
+        height: 45px !important;
+        padding: 0px 2px !important;
+        word-break: keep-all;
+        line-height: 1.2;
+    }
+    
     .material-wrapper {
         grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
         gap: 8px;
@@ -153,17 +165,11 @@ div[data-baseweb="select"] {
         font-size: 13px;
     }
     
-    /* 텍스트 크기 조정 */
     h1 {
         font-size: 24px !important;
     }
     .sub-title {
         font-size: 20px !important;
-    }
-    
-    div.stButton > button {
-        font-size: 16px;
-        height: 45px;
     }
 }
 </style>
@@ -237,23 +243,26 @@ st.markdown("""
 
 
 # =========================
-# 공종 버튼 (모바일을 고려해 3열 배열로 수정)
+# 공종 버튼 (가로 3열 유지 로직)
 # =========================
-cols = st.columns(3)
-
 types = [
     "타일공사", "방수공사", "미장공사", "도장공사",
     "내장공사", "도배공사", "마루공사", "가구공사",
     "창호공사", "금속공사", "전기공사", "설비공사"
 ]
 
-for i, t in enumerate(types):
-    with cols[i % 3]:
-        if st.button(t, key=f"type_{i}"):
-            st.session_state.defect_type = t
-            st.session_state.search_clicked = False
-            st.session_state.video_menu = None
-            st.session_state.doc_menu = None
+# 모바일에서도 읽는 순서(좌->우)가 꼬이지 않도록 3개씩 끊어서 출력합니다.
+for i in range(0, len(types), 3):
+    cols = st.columns(3)
+    for j in range(3):
+        if i + j < len(types):
+            with cols[j]:
+                # 버튼 고유 키값 지정
+                if st.button(types[i + j], key=f"type_{i+j}"):
+                    st.session_state.defect_type = types[i + j]
+                    st.session_state.search_clicked = False
+                    st.session_state.video_menu = None
+                    st.session_state.doc_menu = None
 
 if st.session_state.defect_type:
     st.markdown(f"""
