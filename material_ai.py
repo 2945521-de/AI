@@ -42,7 +42,7 @@ if "doc_menu" not in st.session_state:
     st.session_state.doc_menu = None
 
 # =========================
-# 전체 스타일 (웹/모바일 완벽 반응형 - 모바일 3열 강제 고정)
+# 전체 스타일 (제목 한 줄 강제 & 모바일 최적화)
 # =========================
 st.markdown("""
 <style>
@@ -50,7 +50,7 @@ st.markdown("""
     background-color: #f8f9fa;
 }
 
-/* 💻 PC 웹 화면: 너무 넓게 퍼지지 않도록 가운데 정렬 */
+/* 💻 PC 웹 화면 설정 */
 .block-container {
     padding-top: 2rem;
     padding-bottom: 2rem;
@@ -58,7 +58,6 @@ st.markdown("""
     margin: 0 auto;
 }
 
-/* 기본 버튼 디자인 */
 div.stButton > button {
     height: 55px;
     border-radius: 12px;
@@ -109,24 +108,36 @@ div.stButton > button:hover {
     line-height: 1.4;
 }
 
-/* 📱 모바일 화면: 가로 스크롤 제거 및 무조건 3열 고정 */
+/* 📱 모바일 화면 설정 */
 @media screen and (max-width: 768px) {
     .block-container {
-        padding-top: 1rem !important; /* 상단 여백을 더 줄임 */
+        padding-top: 1rem !important; 
         padding-left: 0.5rem !important; 
         padding-right: 0.5rem !important;
         overflow-x: hidden !important; 
     }
     
-    /* 🔥 핵심: Streamlit이 모바일에서 세로(column)로 꺾는 것을 가로(row)로 강제 고정! */
+    /* 🔥 핵심 1: 제목이 두 줄로 깨지는 현상 완벽 방지 */
+    h1 { 
+        font-size: 24px !important; 
+        white-space: nowrap !important; /* 무조건 한 줄로 고정 */
+        letter-spacing: -1px !important; /* 글자 간격을 좁혀서 화면에 쏙 들어가게 함 */
+    }
+    h3 { 
+        font-size: 16px !important; 
+        white-space: nowrap !important; 
+        letter-spacing: -1px !important; 
+    }
+    .sub-title { font-size: 18px !important; }
+    
+    /* 공종 버튼 3열 강제 고정 */
     div[data-testid="stHorizontalBlock"] {
         flex-direction: row !important; 
         flex-wrap: nowrap !important;
         gap: 5px !important; 
-        margin-bottom: 0px !important; /* 버튼 묶음 사이 세로 간격 최소화 */
+        margin-bottom: 0px !important; 
     }
     
-    /* 각 버튼이 정확히 33.3%씩 자리를 차지하도록 강제 */
     div[data-testid="column"], div[data-testid="stColumn"] {
         width: 33.33% !important;
         flex: 1 1 33.33% !important; 
@@ -134,11 +145,11 @@ div.stButton > button:hover {
         padding: 0 !important; 
     }
     
-    /* 모바일용 버튼 크기를 한 화면에 들어오도록 압축 */
+    /* 모바일용 버튼 크기 최적화 */
     div.stButton > button {
         font-size: 13px !important; 
         letter-spacing: -0.5px !important; 
-        height: 42px !important; /* 높이를 확 줄여서 스크롤 방지 */
+        height: 42px !important; 
         padding: 0 !important;
         margin: 2px 0px !important; 
     }
@@ -149,8 +160,6 @@ div.stButton > button:hover {
     }
     
     .material-card { padding: 8px; font-size: 12px; }
-    h1 { font-size: 22px !important; }
-    .sub-title { font-size: 18px !important; }
 }
 </style>
 """, unsafe_allow_html=True)
