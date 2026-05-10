@@ -42,7 +42,7 @@ if "doc_menu" not in st.session_state:
     st.session_state.doc_menu = None
 
 # =========================
-# 전체 스타일 (제목 한 줄 강제 & 모바일 최적화)
+# 전체 스타일 (사이드바 흰색 버튼 복구 포함)
 # =========================
 st.markdown("""
 <style>
@@ -58,6 +58,7 @@ st.markdown("""
     margin: 0 auto;
 }
 
+/* 🟧 메인 화면 버튼 디자인 (주황색) */
 div.stButton > button {
     height: 55px;
     border-radius: 12px;
@@ -73,6 +74,24 @@ div.stButton > button {
 div.stButton > button:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+}
+
+/* ⬜ 사이드바 전용 버튼 디자인 (흰색으로 예외 처리) */
+section[data-testid="stSidebar"] div.stButton > button {
+    background: #ffffff !important;
+    color: #212529 !important;
+    border: 1px solid #e9ecef !important;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05) !important;
+    height: auto !important; 
+    padding: 12px !important;
+    font-size: 15px !important;
+    margin-bottom: 10px !important;
+}
+
+section[data-testid="stSidebar"] div.stButton > button:hover {
+    background: #f8f9fa !important;
+    transform: translateY(0px) !important; /* 마우스 올렸을 때 위로 들썩임 방지 */
+    border-color: #dee2e6 !important;
 }
 
 .warning-banner {
@@ -117,11 +136,10 @@ div.stButton > button:hover {
         overflow-x: hidden !important; 
     }
     
-    /* 🔥 핵심 1: 제목이 두 줄로 깨지는 현상 완벽 방지 */
     h1 { 
         font-size: 24px !important; 
-        white-space: nowrap !important; /* 무조건 한 줄로 고정 */
-        letter-spacing: -1px !important; /* 글자 간격을 좁혀서 화면에 쏙 들어가게 함 */
+        white-space: nowrap !important; 
+        letter-spacing: -1px !important; 
     }
     h3 { 
         font-size: 16px !important; 
@@ -145,13 +163,21 @@ div.stButton > button:hover {
         padding: 0 !important; 
     }
     
-    /* 모바일용 버튼 크기 최적화 */
+    /* 모바일용 메인 버튼 크기 최적화 */
     div.stButton > button {
         font-size: 13px !important; 
         letter-spacing: -0.5px !important; 
         height: 42px !important; 
         padding: 0 !important;
         margin: 2px 0px !important; 
+    }
+    
+    /* 모바일에서 사이드바 메뉴 열었을 때 버튼이 찌그러지지 않게 방어 */
+    section[data-testid="stSidebar"] div.stButton > button {
+        height: auto !important;
+        padding: 12px !important;
+        font-size: 15px !important;
+        margin-bottom: 8px !important;
     }
     
     .material-wrapper {
@@ -480,16 +506,18 @@ warranty_db = {
 }
 
 # =========================
-# 검색 버튼 (가운데 정렬 유지)
+# 검색 버튼 (가운데 정렬)
 # =========================
 search_btn = False
 
 if defect_type is not None:
     st.markdown("<br>", unsafe_allow_html=True)
-    # 모바일에서도 검색 버튼이 꽉 차거나 적당한 너비를 가지도록 컬럼 비율 조정
-    btn_col1, btn_col2, btn_col3 = st.columns([1, 2, 1])
-    with btn_col2:
-        search_btn = st.button("🔍 검색 실행")
+    
+    # 화면을 좌/중/우 3등분해서 가운데 공간에만 버튼을 배치합니다.
+    col_left, col_center, col_right = st.columns([1, 1, 1])
+    
+    with col_center:
+        search_btn = st.button("🔍 검색 실행", use_container_width=True)
 
 # =========================
 # 검색 처리
